@@ -1,0 +1,53 @@
+<x-view>
+    <x-view class="background" />
+    <x-view class="app">
+      <x-view class="banner">
+        <x-view class="logo" (bindtap)="onTap($event)">
+          @if(alterLogo()){
+            <x-image [src]="angularLogo" class="logo--angular" />
+          } @else {
+            <x-image [src]="lynxLogo" class="logo--lynx" />
+          }
+        </x-view>
+        <x-text class="title">Angular</x-text>
+        <x-text class="subtitle">on Lynx</x-text>
+      </x-view>
+      <x-view class="content">
+        <x-image [src]="arrow" class="arrow" />
+        <x-text class="description">Tap the logo and have fun!</x-text>
+        <x-text class="hint">
+          Edit<x-text style="font-style: italic;"> src/app/app.components.ts</x-text>
+        </x-text>
+      </x-view>
+      <x-view style="flex: 1"></x-view>
+    </x-view>
+  </x-view>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <!-- <x-x-view class="container">
+    <x-x-view class="counter-btn" (bindtap)="decrement($event)">
+      <x-x-text>-</x-x-text>
+    </x-x-view>
+    <x-x-text>{{count()}}</x-x-text>
+    <x-x-view class="counter-btn" (bindtap)="increment()">
+      <x-x-text>+</x-x-text>
+    </x-x-view>
+  </x-x-view>
+  <x-x-image [src]="arrow">
+  </x-x-image> -->
+  <!-- <x-x-image [src]="lynx">
+  </x-x-image> -->

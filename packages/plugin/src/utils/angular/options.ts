@@ -95,8 +95,8 @@ type Replacement = {
 export function readTarget(project: workspaces.ProjectDefinition, target = 'build'): TargetDefinition | undefined{
   return project.targets.get(target);
 }
-export async function readBuildOptions(project: workspaces.ProjectDefinition, configurationName?: string): Promise<NormalizedOptions | null> {
-  const workspaceRoot = process.cwd();
+export async function readBuildOptions(project: workspaces.ProjectDefinition, basePath: string, configurationName?: string): Promise<NormalizedOptions | null> {
+  const workspaceRoot = basePath;
   const target = readTarget(project);
   if(!target){
     throw new Error("couldn't find target")
@@ -120,15 +120,15 @@ export async function readBuildOptions(project: workspaces.ProjectDefinition, co
   assert(!!buildOptions, "build options is undefined");
   // TODO: support jit
   const aot = true;
-  const tsconfig = buildOptions["tsConfig"] as string;
+  const tsconfig = path.join(workspaceRoot, buildOptions["tsConfig"] as string);
   const optimizationOptions = normalizeOptimization(
     buildOptions["optimization"] as Record<string, any>
   );
   const sourcemapOptions = normalizeSourceMaps(
     buildOptions["sourceMap"] ?? false
   );
-  const browser = buildOptions["browser"] as string;
-  const index = buildOptions["index"] as string;
+  const browser = path.join(workspaceRoot, buildOptions["browser"] as string);
+  const index = path.join(workspaceRoot, buildOptions["index"] as string);
   let polyfills = buildOptions["polyfills"] as string | string[] | undefined;
   polyfills =
     polyfills === undefined || Array.isArray(polyfills)
@@ -169,6 +169,10 @@ export async function readBuildOptions(project: workspaces.ProjectDefinition, co
   const advancedOptimizations = !!aot && optimizationOptions.scripts;
   const cacheOptions = normalizeCacheOptions(buildOptions['projectMetadata'], workspaceRoot);
   const inlineStyleLanguage = buildOptions['inlineStyleLanguage'] as string | undefined;
+  const styles = (buildOptions["styles"] as string[] ?? [])
+  .map(stylePath=> path.join(workspaceRoot, stylePath));
+
+  const outputPath = path.join(workspaceRoot, buildOptions["outputPath"] as string)
   const normalizedOptions: NormalizedOptions = {
     optimizationOptions,
     advancedOptimizations,
@@ -178,13 +182,13 @@ export async function readBuildOptions(project: workspaces.ProjectDefinition, co
     sourcemapOptions,
     tsconfig,
     polyfills: polyfills ?? [],
-    outputPath: buildOptions["outputPath"] as string | undefined,
+    outputPath,
     workspaceRoot,
     outputNames,
     cacheOptions,
     inlineStyleLanguage,
     outputHashing,
-    styles: buildOptions["styles"] as string[] ?? []
+    styles
   };
   return normalizedOptions;
 }

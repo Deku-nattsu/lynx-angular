@@ -1,7 +1,7 @@
 // import type {
 //   NormalizedEnvironmentConfig,
 // } from "@rsbuild/core";
-import type {RsbuildPluginAPI, Rspack} from '@lynx-js/rspeedy'
+import type {ExposedAPI, RsbuildPluginAPI, Rspack} from '@lynx-js/rspeedy'
 import type { UndefinedOnPartialDeep } from "type-fest";
 import { LAYERS } from "./layers.js";
 import {
@@ -40,7 +40,12 @@ export function applyEntry(api: RsbuildPluginAPI, options: Required<PluginAngula
     targetSdkVersion,
 
     experimental_isLazyBundle,
-  } = options
+  } = options;
+
+  const { config } = api.useExposed<ExposedAPI>(
+    Symbol.for('rspeedy.api'),
+  )!
+
   api.modifyBundlerChain((chain, {environment, isDev}) => {
     const isLynx = environment.name === 'lynx'
     const isWeb = environment.name === 'web'
@@ -52,7 +57,13 @@ export function applyEntry(api: RsbuildPluginAPI, options: Required<PluginAngula
     let backgroundChunks: string[] = [];
     Object.entries(entries).forEach(([entryName, entryPoint]) => {
       const { imports } = getChunks(entryName, entryPoint.values());
-      console.log(imports)
+
+      const templateFilename = (
+        typeof config.output?.filename === 'object'
+          ? config.output.filename.bundle ?? config.output.filename.template
+          : config.output?.filename
+      ) ?? '[name].[platform].bundle';
+
       const mainThreadEntry = `${entryName}__main-thread`;
       const mainThreadName = path.posix.join(`${entryName}/main-thread.js`);
       const backgroundEntry = entryName
@@ -96,7 +107,10 @@ export function applyEntry(api: RsbuildPluginAPI, options: Required<PluginAngula
         .plugin(`${PLUGIN_NAME_TEMPLATE}-${entryName}`)
         .use(LynxTemplatePlugin, [
           {
-            filename: "index.lynx.bundle",
+            filename: templateFilename.replaceAll('[name]', entryName).replaceAll(
+              '[platform]',
+              environment.name,
+            ),
             chunks: [mainThreadEntry, backgroundEntry],
             cssPlugins: [CSSPlugins.parserPlugins.removeFunctionWhiteSpace()],
             customCSSInheritanceList,

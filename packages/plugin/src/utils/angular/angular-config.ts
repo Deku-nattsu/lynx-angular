@@ -11,12 +11,12 @@ export function applyAngularConfig(
     
     api.modifyRsbuildConfig((config) => {
       // output
-      // config.output = config.output ?? {};
-      // config.output.target = 'web';
-      // config.output.distPath ??= {};
-      // if (buildOptions.outputPath) {
-      //   config.output.distPath.root = path.join(buildOptions.outputPath, 'browser');
-      // }
+      config.output = config.output ?? {};
+      config.output.distPath ??= {};
+      if (buildOptions.outputPath) {
+        config.output.distPath.root = buildOptions.outputPath;
+      }
+      config.output.cleanDistPath = true;
       // const hashFormat = getOutputHashFormat(OutputHashing.None, 8);
       // config.output.filename ??= {};
       // config.output.filename.js = `[name]${hashFormat.chunk}.js`;
@@ -27,7 +27,6 @@ export function applyAngularConfig(
       // config.html ??= {};
       // config.html.template ??= buildOptions.index;
       config.source ??= {};
-      // config.source.entry ??= {};
       // if (!config.source.entry.index) {
       //   const indexPath = relativePrefix(buildOptions.browser);
       //   config.source.entry.index = indexPath;
@@ -42,7 +41,8 @@ export function applyAngularConfig(
       if (polyfills) {
         config.source.preEntry.push(...polyfills);
       }
-      config.source.preEntry.push(...buildOptions.styles.map(relativePrefix));
+      config.source.preEntry.push(...buildOptions.styles);
+      config.source.tsconfigPath = buildOptions.tsconfig;
       const isProd =
         process.env['NODE_ENV'] === "production" || config.mode === "production";
       if (isProd) {
@@ -51,10 +51,3 @@ export function applyAngularConfig(
       }
     });
   }
-
-  export const relativePrefix = (path: string): string => {
-    if (!path.startsWith("./")) {
-      path = "./" + path;
-    }
-    return path;
-  };

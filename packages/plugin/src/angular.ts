@@ -1,5 +1,5 @@
-import type { RsbuildPluginAPI } from '@lynx-js/rspeedy';
-import { getWorkspace } from './utils/angular/readWorkspace.js';
+import type { ExposedAPI, RsbuildPluginAPI } from '@lynx-js/rspeedy';
+import { getAngularWorkspace, getProjectByCwd } from './utils/angular/readWorkspace.js';
 import { readBuildOptions } from './utils/angular/options.js';
 import { JavaScriptTransformer } from '@angular/build/src/tools/esbuild/javascript-transformer';
 import { maxWorkers, useTypeChecking } from './utils/angular/env.js';
@@ -11,11 +11,13 @@ import path from 'path';
 import { applyAngularConfig } from './utils/angular/angular-config.js';
 
 export async function applyAngularRules(api: RsbuildPluginAPI): Promise<void> {
-  const workspace = await getWorkspace();
-  const project = [...workspace.projects.values()][0]!;
-  const buildOptions = (await readBuildOptions(project))!;
+  const {basePath, workspace} = await getAngularWorkspace();
+  const project = getProjectByCwd(workspace, basePath);
+  if(!project) {
+    throw new Error("couldn't find the project");
+  }
+  const buildOptions = (await readBuildOptions(workspace.projects.get(project)!, basePath))!;
   applyAngularConfig(api, buildOptions);
-
   const sourcemap = !!(
     !!buildOptions.sourcemapOptions.scripts &&
     (buildOptions.sourcemapOptions.hidden ? 'external' : true)
@@ -44,7 +46,6 @@ export async function applyAngularRules(api: RsbuildPluginAPI): Promise<void> {
     inlineStyles: string[];
   }>();
   api.onBeforeEnvironmentCompile(async ()=> {
-        console.log("onBeforeEnvironmentCompile")
         // Initialize the Angular compilation for the current build.
         // In watch mode, previous build state will be reused.
         // let referencedFiles;
@@ -63,7 +64,6 @@ export async function applyAngularRules(api: RsbuildPluginAPI): Promise<void> {
                 _order,
                 _className
               ) {
-                console.log("containingFile", containingFile)
                 let componentStyles = componentStylesCache.get(containingFile);
                 if (!componentStyles) {
                   componentStyles = {

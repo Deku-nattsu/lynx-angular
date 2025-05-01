@@ -1,3 +1,5 @@
+import { TouchEvent } from '@lynx-js/types';
+
 declare global {
   /**
    * Determines if code should be placed in the background thread, used as a compile-time define macro
@@ -15,6 +17,13 @@ declare global {
    * Determines if running in profile mode
    */
   let __PROFILE__: boolean; //TODO: implement
+}
+
+
+declare global {
+    interface HTMLElementEventMap {
+        "bindtap": TouchEvent;
+    }
 }
 
 export {};
