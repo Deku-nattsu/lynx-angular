@@ -2,6 +2,7 @@
 // Copyright 2024 The Lynx Authors. All rights reserved.
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
+// Taken from https://github.com/lynx-family/lynx/blob/develop/js_libraries/type-element-api/README.md
 
 export interface ElementRef {}
 
