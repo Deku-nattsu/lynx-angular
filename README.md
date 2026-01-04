@@ -1,5 +1,5 @@
 # Angular + Lynx Integration
-
+# The project is undergoing a complete rewrite with plugin and runtime improvements, i will push the changes as soon as it is usable
 This project provides both a runtime layer and a custom `rspeedy` plugin to enable Angular applications to run on the [Lynx](https://lynxjs.org/) runtime
 
 > 🚧 **Work in Progress**  
